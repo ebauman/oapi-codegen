@@ -167,6 +167,15 @@ func GenerateGoSchema(sref *openapi3.SchemaRef, path []string) (Schema, error) {
 				outType = "interface{}"
 			}
 			outSchema.GoType = outType
+		} else if len(schema.Properties) == 0 && SchemaHasAdditionalProperties(schema) {
+			// If the object has add'l properties but no actual properties
+			// we should make it a map[string]{type}
+			if t == "object" {
+				outType = "map[string]" + schema.AdditionalProperties.Value.Type
+			} else {
+				outType = "interface{}"
+			}
+			outSchema.GoType = outType
 		} else {
 			// We've got an object with some properties.
 			for _, pName := range SortedSchemaKeys(schema.Properties) {
